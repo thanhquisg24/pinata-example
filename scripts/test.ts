@@ -5,7 +5,7 @@ async function mainTest() {
   // deploy a lock contract where funds can be withdrawn
   // one year in the future
   //   const { deployer } = await getNamedAccounts();
-  const deploymentInfo = await deployContract('aaaa', 'bbbb');
+  const deploymentInfo = await deployContract('Fig Nft', 'FFT');
   console.log(
     '🚀 ~ file: test.ts:9 ~ mainTest ~ deploymentInfo',
     deploymentInfo,

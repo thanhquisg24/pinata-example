@@ -7,13 +7,13 @@ const JWT =
 
 const pinFileToIPFS = async () => {
   const formData = new FormData();
-  const src = './GettyImages-845712410.jpg';
+  const src = './Donkey-milk-on-the-agenda-for-Italian-parliament.jpg';
 
   const file = fs.createReadStream(src);
   formData.append('file', file);
 
   const metadata = JSON.stringify({
-    name: 'ok name',
+    name: 'Donkey-milk-on-the-agenda-for-Italian-parliament.jpg',
   });
   formData.append('pinataMetadata', metadata);
 
@@ -41,4 +41,64 @@ const pinFileToIPFS = async () => {
   }
 };
 
-pinFileToIPFS().then();
+interface IMetaDataJson {
+  name: string;
+  image: string;
+  description: string;
+}
+
+const pinJsonMetadata = async (data: IMetaDataJson) => {
+  const _metadata = {
+    description: data.description,
+    image:
+      data.image.indexOf('ipfs://') > -1 ? data.image : 'ipfs://' + data.image,
+    name: data.name,
+  };
+
+  const postData = JSON.stringify({
+    pinataOptions: {
+      cidVersion: 1,
+    },
+    pinataMetadata: {
+      name: data.name + '.json',
+    },
+    pinataContent: {
+      ..._metadata,
+    },
+  });
+  try {
+    const res = await axios.post(
+      'https://api.pinata.cloud/pinning/pinJSONToIPFS',
+      postData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: JWT,
+        },
+      },
+    );
+    console.log(res.data);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+async function main() {
+  const _metadata: IMetaDataJson = {
+    description: 'Donkey from Taiwain',
+    image: '',
+    name: 'Black Donkey',
+  };
+  const resultImg = await pinFileToIPFS();
+  if (resultImg) {
+    _metadata.image = 'ipfs://' + resultImg.IpfsHash;
+    const resultMetadata = await pinJsonMetadata(_metadata);
+    console.log(
+      '🚀 ~ file: index.ts:86 ~ main ~ resultMetadata',
+      resultMetadata,
+    );
+  }
+}
+main().then();
+// pinFileToIPFS().then();

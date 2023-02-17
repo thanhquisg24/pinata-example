@@ -6,21 +6,19 @@ import { HardhatUserConfig } from 'hardhat/config';
 const config: HardhatUserConfig = {
   solidity: '0.8.1',
 
-  defaultNetwork: 'localhost',
+  defaultNetwork: 'figchain',
   networks: {
     localhost: {
       url: 'http://localhost:8545',
     },
     figchain: {
-      url: 'https://rpc-agnek.figchain.org/',
-      gasPrice: 1000000000,
+      url: 'https://rpc-agnek.figchain.org',
+      // gasPrice: 1000000000,
       accounts: {
-        mnemonic: 'ssss',
+        mnemonic:
+          'clap acid check various predict identify december extend program lend deposit name',
       },
     },
-  },
-  paths: {
-    sources: './src/contracts',
   },
 };
 export default config;

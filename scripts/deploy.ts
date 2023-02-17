@@ -1,9 +1,8 @@
 import * as fs from 'fs/promises';
 
-import { F_OK } from 'constants';
-import { ethers } from 'ethers';
+import { Contract } from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import hardhat from 'hardhat';
-import inquirer from 'inquirer';
 
 // import { BigNumber } from 'ethers';
 
@@ -11,24 +10,33 @@ const config = { deploymentConfigFile: null };
 
 const CONTRACT_NAME = 'Minty';
 
-async function deployContract(name, symbol) {
-  const network = hardhat.network.name;
+async function deployContract(name: string, symbol: string) {
+  try {
+    const network = hardhat.network.name;
 
-  console.log(
-    `deploying contract for token ${name} (${symbol}) to network "${network}"...`,
-  );
-  const Minty = await hardhat.ethers.getContractFactory(CONTRACT_NAME);
-  const minty = await Minty.deploy(name, symbol);
+    console.log(
+      `deploying contract for token ${name} (${symbol}) to network "${network}"...`,
+    );
+    const Minty = await hardhat.ethers.getContractFactory(CONTRACT_NAME);
+    const minty = await Minty.deploy(name, symbol);
 
-  await minty.deployed();
-  console.log(
-    `deployed contract for token ${name} (${symbol}) to ${minty.address} (network: ${network})`,
-  );
+    await minty.deployed();
+    console.log(
+      `deployed contract for token ${name} (${symbol}) to ${minty.address} (network: ${network})`,
+    );
 
-  return deploymentInfo(hardhat, minty);
+    return deploymentInfo(hardhat, minty);
+  } catch (error: any) {
+    console.log(
+      '🚀 ~ file: deploy.ts:30 ~ deployContract ~ error',
+      error.message,
+      error.code,
+      error.data,
+    );
+  }
 }
 
-function deploymentInfo(hardhat, minty) {
+function deploymentInfo(hardhat: HardhatRuntimeEnvironment, minty: Contract) {
   return {
     network: hardhat.network.name,
     contract: {
@@ -40,16 +48,9 @@ function deploymentInfo(hardhat, minty) {
   };
 }
 
-async function saveDeploymentInfo(info, filename = undefined) {
+async function saveDeploymentInfo(info: any, filename: any = undefined) {
   if (!filename) {
     filename = config.deploymentConfigFile || 'minty-deployment.json';
-  }
-  const exists = await fileExists(filename);
-  if (exists) {
-    const overwrite = await confirmOverwrite(filename);
-    if (!overwrite) {
-      return false;
-    }
   }
 
   console.log(`Writing deployment info to ${filename}`);
@@ -78,7 +79,7 @@ async function loadDeploymentInfo() {
   return deployInfo;
 }
 
-function validateDeploymentInfo(deployInfo) {
+function validateDeploymentInfo(deployInfo: { contract: any }) {
   const { contract } = deployInfo;
   if (!contract) {
     throw new Error('required field "contract" not found');
@@ -94,25 +95,30 @@ function validateDeploymentInfo(deployInfo) {
   required('abi');
 }
 
-async function fileExists(path) {
-  try {
-    await fs.access(path, F_OK);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
+// async function fileExists(path: PathLike | undefined) {
+//   try {
+//     await fs.access(path, F_OK);
+//     return true;
+//   } catch (e) {
+//     return false;
+//   }
+// }
 
-async function confirmOverwrite(filename) {
-  const answers = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'overwrite',
-      message: `File ${filename} exists. Overwrite it?`,
-      default: false,
-    },
-  ]);
-  return answers.overwrite;
-}
+// async function confirmOverwrite(filename: undefined) {
+//   const answers = await inquirer.prompt([
+//     {
+//       type: 'confirm',
+//       name: 'overwrite',
+//       message: `File ${filename} exists. Overwrite it?`,
+//       default: false,
+//     },
+//   ]);
+//   return answers.overwrite;
+// }
 
 export { deployContract, loadDeploymentInfo, saveDeploymentInfo };
+
+deployContract('Fig Nft Collection', 'FFT').catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
